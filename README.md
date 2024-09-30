@@ -194,4 +194,20 @@ Si utilizas este pipeline en tu investigación, por favor cítalo como:
 - [Nextflow] (https://www.nextflow.io/)
 - [nf-core] (https://nf-co.re/)
 
-  
+
+# Explícación de los parametros utilizados en cada herramienta
+
+## FastQC
+- Control de calidad 
+   ```
+  fastqc ${reads} --outdir . --threads ${task.cpus}
+   ```
+- Generación del archivo resumen (MultiQC)
+   ```
+  multiqc .
+   ```
+  Parámetros:
+   - 'reads': Corresponde a los archivos de las lecturas en formato .fastq, en este caso se utiliza para los datos crudos y los que han pasado por el proceso de recorte (trimming).
+   - 'outdir': Especifica el directorio donde se almacenarán los resultados. En este caso, el usuario define la ruta del directorio de salida. En base a esta ruta se creará una carpeta donde se guardarán los archivos generados por FastQC de los datos crudos y procesados.
+   - 'threads': Indica el número de núcleos de CPU a utilizar para ejecutar el proceso de análisis. En este caso se utilizó el valor 4.
+“.”: Indica que MultiQC y FastQC deben buscar los archivos de salida en el directorio actual para generar los reportes.
