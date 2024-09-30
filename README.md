@@ -207,9 +207,9 @@ Si utilizas este pipeline en tu investigación, por favor cítalo como:
   multiqc .
    ```
   Parámetros:
-   - `reads': Corresponde a los archivos de las lecturas en formato .fastq, en este caso se utiliza para los datos crudos y los que han pasado por el proceso de recorte (trimming).
-   - `outdir': Especifica el directorio donde se almacenarán los resultados. En este caso, el usuario define la ruta del directorio de salida. En base a esta ruta se creará una carpeta donde se guardarán los archivos generados por FastQC de los datos crudos y procesados.
-   - `threads': Indica el número de núcleos de CPU a utilizar para ejecutar el proceso de análisis. En este caso se utilizó el valor 4.
+   - `reads`: Corresponde a los archivos de las lecturas en formato .fastq, en este caso se utiliza para los datos crudos y los que han pasado por el proceso de recorte (trimming).
+   - `outdir`: Especifica el directorio donde se almacenarán los resultados. En este caso, el usuario define la ruta del directorio de salida. En base a esta ruta se creará una carpeta donde se guardarán los archivos generados por FastQC de los datos crudos y procesados.
+   - `threads`: Indica el número de núcleos de CPU a utilizar para ejecutar el proceso de análisis. En este caso se utilizó el valor 4.
 “.”: Indica que MultiQC y FastQC deben buscar los archivos de salida en el directorio actual para generar los reportes.
 
 ## Trimmomatic
@@ -234,5 +234,31 @@ El comando utilizado para realizar el trimming de las secuencias es:
 
 
 ## STAR
+- Para realizar el alineamiento
+   ```
+   STAR --genomeDir $genomeDir --readFilesIn $read1 $read2 --readFilesCommand zcat --readMatesLengthsIn NotEqual --outFileNamePrefix ${prefix}_ --runThreadN ${task.cpus} --sjdbGTFfile $gtf --sjdbOverhang ${params.overhang} --                 alignSJDBoverhangMin ${params.sjdbOverhangMin} --outFilterScoreMinOverLread ${params.filterScore} --outFilterMatchNminOverLread ${params.filterScore} --outFilterMismatchNmax ${params.outFilterMismatchNmax} --outFilterMultimapNmax 20 --alignMatesGapMax 1000000 --outSAMattributes All --outSAMtype BAM Unsorted --outFilterType BySJout --twopassMode Basic --alignEndsType Local --alignIntronMax ${params.alignIntronMax} --quantMode GeneCounts
+  ```
 
+- Parámetros:
+
+   - `readFilesIn`: Archivos de lecturas en formato .fastq.
+   - `readFilesCommand`: Opción para descomprimir archivos fastq.gz.
+   - `readMatesLengthsIn`: Indica si las longitudes de las lecturas pareadas pueden ser diferentes.
+   - `outFileNamePrefix`: Prefijo para nombrar los archivos de salida.
+   - `runThreadN`: Número de núcleos de CPU utilizados en la alineación.
+   - `sjdbGTFfile`: Archivo GTF con anotaciones para guiar la alineación.
+   - `sjdbOverhang`: Longitud del segmento de lectura. En este caso fueron 101 pares de bases.
+   - `alignSJDBoverhangMin`: Longitud mínima de los fragmentos de lectura alineados en las junctions de splicing. En este caso, se establece en 8 el valor.
+   - `outFilterScoreMinOverLread`: Umbral mínimo para la puntuación de alineación en relación con la longitud de la lectura. Se usa para filtrar alineaciones de baja calidad. En este caso, el valor es 0.66.
+   - `outFilterMatchNminOverLread`: Umbral mínimo para la proporción de coincidencias en relación con la longitud de la lectura. También este valor se ha establecido en 0.66.
+   - `outFilterMismatchNmax`: Número máximo permitido de desajustes en una lectura. En este caso, se permitió un máximo de 5 desajustes.
+   - `outFilterMultimapNmax`: Número máximo permitido de mapeos múltiples para una lectura. En este caso serán 20 ubicaciones de mapeo.
+   - `alignMatesGapMax`: Máxima distancia permitida entre lecturas emparejadas en la alineación. Este valor fue de 1.000.000 nucleótidos.
+   - `outSAMattributes` All: Especifica que todos los atributos del alineamiento deben ser incluidos en los archivos de salida.
+   - `outSAMtype BAM Unsorted`: Formato de los archivos de salida. En este caso, se generará un archivo BAM sin ordenar.
+   - `outFilterType` BySJout: Tipo de filtrado aplicado a las lecturas basadas en la información de las junctions de splicing detectadas.
+   - `twopassMode` Basic: Modo de alineación en dos fases
+   - `alignEndsType` Local: Método de alineación de los extremos de las lecturas, permitiendo alineaciones locales en lugar de globales.
+   - `alignIntronMax` 1000000: Longitud máxima permitida de los intrones para la alineación. El valor utilizado fue de 1,000,000 nucleótidos.
+   - `quantMode` GeneCounts: Modo de cuantificación que cuenta las lecturas alineadas por gen.
 
