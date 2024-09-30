@@ -343,5 +343,45 @@ El comando utilizado para realizar el trimming de las secuencias es:
   ```
 - Parámetros:
    - `b`: Especifica el archivo BAM de entrada que contiene las lecturas alineadas.
-   - `o`: Define el nombre del archivo de salida en formato BigWig (.bw). 
+   - `o`: Define el nombre del archivo de salida en formato BigWig (.bw).
+ 
+## rMATS
+   ```
+   rmats.py --b1 <bam1_file> --b2 <bam2_file> --gtf <reference_gtf> --od <output_directory> --tmp <temporary_directory> -t paired --readLength 101 --nthread 12 --libType fr-firststrand --novelSS --mil 50 --mel 500
+  ```
+- Parámetros:
+   - `--b1`: Archivo BAM para el primer grupo de muestras.
+   - `--b2`: Archivo BAM para el segundo grupo de muestras.
+   - `--gtf`: Archivo GTF de referencia.
+   - `--od`: Directorio donde se almacenarán los resultados de rMATS.
+   - `--tmp`: Directorio para archivos temporales.
+   - `-t`: Especifica que las lecturas son emparejadas, en este caso se indica que es paired-end.
+   - `--readLength`: Longitud de las lecturas, el valor de este parámetro corresponde a 101.
+   - `--nthread`: Número de hilos de CPU a utilizar para el procesamiento, se utilizó un valor de 12.
+   - `--libType`: Tipo de biblioteca, en este caso, fr-firststrand para lecturas orientadas al primer extremo.
+   - `--novelSS`: Permite la detección de sitios de empalme novedosos.
+   - `--mil`: Número mínimo de lecturas para considerar un evento de splicing, en este caso se utilizó el valor de 50.
+   - `--mel`: Número máximo de lecturas para considerar un evento de splicing, se definió en 500 para este proceso.
 
+
+## rMATS (sashimiplot)
+   ```
+   rmats2sashimiplot --b1 $bam1 --b2 $bam2 --event-type $event_type -e "${gene}_${event_type}_events_with_header.txt" --exon_s 1 --intron_s 5 --l1 $label1 --l2 $label2 -o "${gene}_${event_type}_sashimi_plot" --group-info $grouping_file --   font_size 8 --fig-height 8 --fig-width 12
+  ```
+
+- Parámetros:
+   - `--b1`: Archivo BAM para el primer grupo de muestras.
+   - `--b2`: Archivo BAM para el segundo grupo de muestras.
+   - `--event-type`: Tipo de evento de empalme a visualizar, las opciones a utilizar son SE, A5SS, A3SS, MXE, RI. En este caso para efectos del proyecto se realizan los sashimi plots solo con SE (Exon Skipping).
+   - `--e`: Archivo con los eventos de empalme, generado por rMATS.
+   - `--exon_s`: Tamaño del exón en el gráfico, el valor utilizado en este caso es 1.
+   - `--intron_s`: Tamaño del intrón en el gráfico, el valor considerado en este caso es 5.
+   - `--l1`: Etiqueta para el primer grupo de muestras.
+   - `--l2`: Etiqueta para el segundo grupo de muestras.
+   - `--o`: Nombre de los archivos de salida.
+   - `--group-info`: Archivo para especificar las condiciones de agrupamiento en los gráficos. Se debe indicar el rango de las muestras para cada condición. Por ejemplo, si hay tres muestras de control y tres de tratamiento, el archivo será:
+      control: 1-3
+      tratamiento: 4-6
+   - `--font-size`: Tamaño de fuente para el gráfico, en ese caso el valor definido fue de 8.
+   - `--fig-height`: Altura del gráfico en pulgadas, el valor utilizado es de 8.
+   - `--fig-width`: Ancho del gráfico en pulgadas, el valor en este caso fue de 12.
