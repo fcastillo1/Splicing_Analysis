@@ -385,3 +385,155 @@ El comando utilizado para realizar el trimming de las secuencias es:
    - `--font-size`: Tamaño de fuente para el gráfico, en ese caso el valor definido fue de 8.
    - `--fig-height`: Altura del gráfico en pulgadas, el valor utilizado es de 8.
    - `--fig-width`: Ancho del gráfico en pulgadas, el valor en este caso fue de 12.
+
+## Salmon 
+- Salmon Index
+   ```
+   salmon index --threads $task.cpus -t gentrome.fa.gz -d decoys.txt -i salmon_index
+  ```
+   - Parámetros:
+      - `--threads`: Número de hilos de CPU a utilizar, en este caso se definió con 12.
+      - `-t`: Archivo de transcriptoma en formato FASTA o FASTQ, este se combina los transcritos y el genoma
+      - `-d`: Archivo que contiene secuencias de decoy, las cuales son secuencias genómicas usadas para evitar alineaciones erróneas a regiones no transcriptómicas, mejorando la precisión de la cuantificación de transcritos. En este caso el archivo se generó por defecto.
+      - `-i`: Directorio donde se almacenará el índice de Salmon.
+
+- Salmon quant
+   ```
+   salmon quant --index $index --libType $strandedness $input_reads --geneMap $gtf --threads $task.cpus --validateMappings --numBootstraps 100 --seqBias --gcBias $args -o $prefix
+  ```
+   - Parámetros:
+      - `--index`: Directorio que contiene el índice de Salmon.
+      - `--libType`: Existen cuatro tipos de bibliotecas: ISR (first-strand, reverse), ISF (second-strand, forward), IU (unstranded), y A(unknown). En este caso, se usaron datos unstranded (IU) según el estudio de Ghandi et al. (2019). Para confirmar, se realizó un análisis con inferExperiment de BEDTools sobre 200,000 lecturas paired-end del archivo SRR8615452_Aligned.sortedByCoord.out, de las cuales un 3.86% no pudo determinarse su orientación. El análisis mostró que las fracciones de lecturas en las categorías para definir la hebra a la cual pertenecen son: 1++, 1--, 2+-, 2-+ (0.4808) y 1+-, 1-+, 2++, 2--(0.4806). Estos valores al ser muy similares confirmaron que el experimento es unstranded.
+      - `--input_reads`: Archivos de lectura de entrada
+      - `--geneMap`: Archivo GTF para mapear los genes
+      - `--threads`: Número de hilos de CPU a utilizar 
+      - `--validateMappings`: Activa la validación de mapeos.
+      - `--numBootstraps`: Número de réplicas de bootstrap para estimación de errores, el valor utilizado fue 100.
+      - `--seqBias`: Corrige sesgos específicos en los datos de entrada.
+      - `--gcBias`: Corrige sesgos relacionados de contenido GC.
+      - `-o`: Directorio de salida para los resultados.
+
+## Suppa
+- Generación de eventos.
+   ```
+   suppa.py generateEvents -i ${gtf_file} -o events -f ioe -e ${params.events}
+  ```
+- Parámetros:
+   - `-i`: Archivo GTF de entrada.
+   - `-o`: Prefijo para los archivos de salida.
+   - `-f`: Formato de eventos, en este caso se utilizó IOE (Inclusion of Events), donde contiene información sobre la inclusión o exclusión de un exón en eventos de splicing alternativo.
+   - `-e`: Tipos de eventos a generar, entre las opciones son SE, A5/A3, MX, RI, AF/AL. En este caso se consideraron todos los eventos.
+
+- Generación de isoformas.
+   ```
+   suppa.py generateEvents -i ${gtf_file} -o isoforms -f ioi
+  ```
+- Parámetros:
+   - `-i`: Archivo GTF de entrada.
+   - `-o`: Prefijo para los archivos de salida.
+   - `-f`: Formato de eventos, la opción IOI (Inclusion of Isoforms) indica la proporción de isoformas en los eventos de splicing y permite medir cómo influyen en las variantes de transcritos.
+
+- Cálculo de PSI por evento.
+   ```
+   suppa.py psiPerEvent -i $ioe_file -e $tpm -o ${ioe_file.baseName}
+  ```
+- Parámetros:
+   - `-i`: Archivo IOE con eventos.
+   - `-e`: Archivo TPM con valores obtenidos desde tximport.
+   - `-o`: Prefijo para los archivos de salida.
+
+- Cálculo de PSI por isoforma.
+  ```
+   suppa.py psiPerIsoform -g $gtf -e $tpm -o per_isoform
+  ```
+- Parámetros:
+   - `-g`: Archivo GTF de referencia.
+   - `-e`: Archivo TPM con valores obtenidos desde tximport.
+   - `-o`: Prefijo para los archivos de salida.
+
+
+- Análisis de splicing diferencial.
+  ```
+  suppa.py diffSplice -m empirical -i ${ioe_file} -p ${psi_basalA} ${psi_basalB} -e ${tpm_basalA} ${tpm_basalB} --area ${params.area} --lower-bound ${params.lower_bound} --alpha ${params.alpha} --tpm-threshold ${params.tpm_threshold} --nan-   threshold ${params.nan_threshold} -gc -o diffsplice_${event_type}
+  ```
+- Parámetros:
+   - `-m`: Método para el cálculo diferencial, puede ser empirical/classical. En este caso se utilizó empirical.
+   - `-i`: Archivo IOE con evento.
+   - `-p`: Archivos con valores PSI para las diferentes condiciones.
+   - `-e`: Archivos con valores TPM por cada una de las condiciones.
+   - `--area`: Área alrededor del evento, el valor utilizado corresponde a 1000.
+   - `--lower-bound`: Umbral inferior de significancia, el valor de este parámetro fue de 0.05.
+   - `--alpha`: Nivel de significancia, el valor utilizado es 0.05
+   - `--tpm-threshold`: Umbral de TPM, el valor definido es 0.
+   - `--nan-threshold`: Umbral para valores NaN, el valor utilizado es 0.
+   - `-gc`: Corrección de sesgo GC.
+   - `-o`: Prefijo para los archivos de salida.
+
+- Clustering de eventos de splicing.
+  ```
+  suppa.py clusterEvents --dpsi diffsplice_${event_type}.dpsi --psivec diffsplice_${event_type}.psivec --sig-threshold ${params.sig_threshold} --dpsi-threshold ${params.dpsi_threshold} --eps ${params.eps} --metric ${params.metric} --min-pts    ${params.min_pts} --groups ${params.groups} --clustering ${params.clustering_method} -o cluster${event_type}
+  ```
+- Parámetros:
+   - `--dpsi`: Archivo ΔPSI para clustering.
+   - `--psivec`: Archivo vector PSI para clustering.
+   - `--sig-threshold`: Umbral de significancia, el valor definido fue de 0.05.
+   - `--dpsi-threshold`: Umbral de ΔPSI, en este caso el valor utilizado fue 0.05.
+   - `--eps`: Parámetro épsilon para DBSCAN, el valor fue 0.05.
+   - `--metric`: Métrica de las distancias utilizadas para el cálculo, las opciones son euclidean, manhattan, cosine. En este caso la métrica utilizada fue euclidean.
+   - `--min-pts`: Número mínimo de puntos para clúster, en este caso el valor utilizado es 20.
+   - `--groups`: Para el clustering de eventos, especifica los rangos de columnas para cada condición. Por ejemplo,  si la primera condición tiene tres muestras y la segunda condición también, el parámetro sería 1-3,4-6.
+   - `--clustering`: Método de clustering, existen dos opciones las cuales son DBSCAN, OPTICS. En este caso el valor utilizado fue DBSCAN.
+   - `-o`: Prefijo para los archivos de salida.
+
+
+## DESeq2
+  ```
+  Rscript $projectDir/modules/deseq_differential.R --count_file '${counts}' --sample_file '${samplesheet}' --contrast '${contrast}' --output_prefix '${prefix}' --gtf_file '${gtf_file}' --lfc_threshold ${params.lfc_threshold ?: 0} --alpha ${params.alpha ?: 0.1} --p_adjust_method '${params.p_adjust_method ?: 'BH'}' --shrink_lfc ${params.shrink_lfc ?: 'true'} --cores ${task.cpus}
+  ```
+- Parámetros:
+   - `--count`: Archivo con las cuentas de lectura, en este caso se utilizó el archivo salmon.merged.gene_counts_length_scaled.tsv proveniente desde tximport.
+   - `--samplesheet`: Archivo con la información de las muestras.
+   - `--contrast`: Contraste para la comparación, en este caso se definió como condiciones, con el parámetro de reference_level para la primera condición de las lecturas y target_level para la segunda condición a comparar.
+   - `--output_prefix`: Prefijo para los archivos de salida.
+   - `--gtf_file`: Archivo GTF de anotación.
+   - `--lfc_threshold`: Umbral para el cambio logarítmico de la expresión (LFC), el valor definido fue de 0.58.
+   - `--alpha`: Nivel de significancia, el valor utilizado fue de 0.05.
+   - `--p_adjust_method`: Método de ajuste para p-valores. Las opciones corresponden a: Sin ajuste (none), utilizando el método de Benjamini-Hochberg (BH), método de Benjamini-Yekutieli para pruebas correlacionadas (BY), método de Holm-Bonferroni de ajuste secuencial (HOLM) y utilizando el método de Hochberg con un ajuste secuencial y conservador. En este caso se utilizó el método de BH.
+   - `--shrink_lfc`: Indica si se debe realizar el ajuste los cambios en el logaritmo para reducir la varianza en el valor de Log FoldChange, en este caso el parámetro fue true.
+   - `--cores`: Número de núcleos a utilizar, el valor utilizado fue 4.
+
+
+## GSEA
+
+  ```
+  $gseaPath/gsea-cli.sh GSEAPreranked -rnk $rnk -gmx $gmt_file -out $prefix -set_min ${params.gsea_set_min} -set_max ${params.gsea_set_max} -collapse ${params.gsea_collapse} -mode ${params.gsea_mode} -create_svgs ${params.gsea_create_svgs}_include_only_symbols ${params.gsea_include_only_symbols} -make_sets ${params.gsea_make_sets} -plot_top_x ${params.gsea_plot_top_x} -rnd_seed ${params.gsea_rnd_seed} -zip_report ${params.gsea_zip_report} $args
+  ```
+- Parámetros:
+   - `GSEAPreranked`: Permite ejecutar el análisis GSEA con pre-ranking.
+   - `-rnk`: Archivo de ranking fue generado con los resultados de DESeq2.
+   - `-gmx`: Archivo con los conjuntos de genes. En este caso se descargaron desde la base de datos MSigDB para Homo Sapiens. Los archivos utilizados fueron Hallmarks de cáncer (H), Pathways de categorías de genes curados (C2), Targets reguladores de genes (C3), Ontología de genes (C5), Pathways de oncogenes (C6) y Conjuntos de genes característicos de cada célula (C8).
+   - `-out`: Prefijo para los archivos de salida.
+   - `-set_min`: Tamaño mínimo de los conjuntos, en este caso fue de 10.
+   - `-set_max`: Tamaño máximo de los conjuntos, el valor utilizado fue 1000.
+   - `-collapse`: Indica si se colapsaron los conjuntos, en este caso fue false.
+   - `-mode`: Modo de análisis, se utilizó con máxima probabilidad.
+   - `-create_svgs`: Indica la creación de gráficos SVG, en este caso fue true.
+   - `-include_only_symbols`: Incluye la simbología de genes, se utilizó true.
+   - `-make_sets`: Indica la creación de conjuntos de genes, en este caso fueron creados.
+   - `-plot_top_x`: Número de conjuntos para mostrar en los gráficos, el valor utilizado fue de 20.
+   - `-rnd_seed`:  Generación de números aleatorios, se utilizó timestamp.
+   - `-zip_report`: Indica si se debe comprimir el informe, el parámetro empleado fue false.
+
+## GProfiler
+
+  ```
+  gost_results <- gost(query = de_genes, organism = "hsapiens", correction_method = "g_SCS", user_threshold = 0.05, domain_scope = "custom", custom_bg = background_genes, sources = c("GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "TF", "MIRNA", "HPA", "CORUM"))
+  ```
+- Parámetros:
+   - `query`: Listado de genes diferenciales para analizar.
+   - `organism`: Organismo de interés, en este caso fue Homo sapiens.
+   - `correction_method`: Método de corrección para p-valores se decidió utilizar g_SCS, el cual es un método que ajusta los valores de p-value en función de las puntuaciones de enriquecimiento en una condición.
+   - `padj_threshold`: Umbral para significancia, el valor utilizado fue de 0.05
+   - `lfc_treshold`: Es el valor límite para filtrar eventos de splicing según su log Fold Change, en este caso fue definido con el valor 0.
+   - `domain_scope`: Uso de un background definido de genes.
+   - `sources`: Fuentes de información de los términos de enriquecimiento a incluir pueden ser biología molecular, procesos biológicos, etc. Las opciones disponibles son: GO:BP, GO:MF, GO:CC, KEGG, REAC, TF, MIRNA, HPA, CORUM todas estas fueron incluidas en este proceso.
