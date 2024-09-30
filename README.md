@@ -170,10 +170,10 @@ Si utilizas este pipeline en tu investigación, por favor cítalo como:
 
 ## Contacto
 
-[Reyes, Francisca] - fcastillor.19@gmail.com
-[Munita, Roberto] - robertomunita@gmail.com
+- [Reyes, Francisca] - fcastillor.19@gmail.com
+- [Munita, Roberto] - robertomunita@gmail.com
 
-URL del Proyecto: [https://github.com/fcastillo1/differential-splicing-pipeline](https://github.com/fcastillo1/Splicing_Analysis)
+- URL del Proyecto: [https://github.com/fcastillo1/differential-splicing-pipeline](https://github.com/fcastillo1/Splicing_Analysis)
 
 ## Agradecimientos
 
@@ -193,4 +193,5 @@ URL del Proyecto: [https://github.com/fcastillo1/differential-splicing-pipeline]
 - [MultiQC] https://multiqc.info/)
 - [Nextflow] (https://www.nextflow.io/)
 - [nf-core] (https://nf-co.re/)
+
   
