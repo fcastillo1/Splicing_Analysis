@@ -207,7 +207,27 @@ Si utilizas este pipeline en tu investigación, por favor cítalo como:
   multiqc .
    ```
   Parámetros:
-   - 'reads': Corresponde a los archivos de las lecturas en formato .fastq, en este caso se utiliza para los datos crudos y los que han pasado por el proceso de recorte (trimming).
-   - 'outdir': Especifica el directorio donde se almacenarán los resultados. En este caso, el usuario define la ruta del directorio de salida. En base a esta ruta se creará una carpeta donde se guardarán los archivos generados por FastQC de los datos crudos y procesados.
-   - 'threads': Indica el número de núcleos de CPU a utilizar para ejecutar el proceso de análisis. En este caso se utilizó el valor 4.
+   - `reads': Corresponde a los archivos de las lecturas en formato .fastq, en este caso se utiliza para los datos crudos y los que han pasado por el proceso de recorte (trimming).
+   - `outdir': Especifica el directorio donde se almacenarán los resultados. En este caso, el usuario define la ruta del directorio de salida. En base a esta ruta se creará una carpeta donde se guardarán los archivos generados por FastQC de los datos crudos y procesados.
+   - `threads': Indica el número de núcleos de CPU a utilizar para ejecutar el proceso de análisis. En este caso se utilizó el valor 4.
 “.”: Indica que MultiQC y FastQC deben buscar los archivos de salida en el directorio actual para generar los reportes.
+
+## Trimmomatic
+El comando utilizado para realizar el trimming de las secuencias es:
+- Para datos de secuenciación de lectura simple (SE)
+     ```
+trimmomatic SE $reads ${sample_id}_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+  ```
+- Para datos de secuenciación de lectura pareada (PE)
+   ```
+trimmomatic PE ${reads[0]} ${reads[1]} ${sample_id}_1_paired_trimmed.fastq.gz ${sample_id}_1_unpaired_trimmed.fastq.gz ${sample_id}_2_paired_trimmed.fastq.gz ${sample_id}_2_unpaired_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+  ```
+- Parámetros:
+   - `SE o PE`: Se ajusta el modo de ejecución de trimmomatic si los datos son de lectura simple (Single-End, SE) o lectura pareada (Paired-End, PE). En ese caso el parámetro utilizado fue Paired-End.
+   - `reads`: En el caso de datos SE, corresponde al archivo .fastq de lectura simple. Para PE, se proporcionan dos archivos .fastq, uno para cada lectura (forward y reverse).
+   - `sample_id`: Identificador de la muestra.
+   -`ILLUMINACLIP`: Define los adaptadores que deben ser recortados. En este caso estaba definido en TruSeq3-PE. Los valores utilizados son 2 para el número de mismatches permitidos, 30 para el score de calidad mínima para cortar y penalización por desajustes de adaptadores de 10.
+   - `LEADING`: Elimina las bases de baja calidad desde el extremo 5' de la lectura si su calidad es inferior a 3.
+   - `TRAILING`: Elimina las bases de baja calidad desde el extremo 3' si su calidad es inferior a 3.
+   - `SLIDINGWINDOW`: Aplica un corte si la calidad promedio de una ventana de 4 bases es menor a 15.
+   - `MINLEN`: Este parámetro recorta de secuencias cuya longitud final sea menor a 36 nucleótidos.
