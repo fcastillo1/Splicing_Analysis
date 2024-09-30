@@ -302,35 +302,42 @@ workflow {
                 def rnk_file = gsea_dir.resolve("${meta.id}_for_gsea.rnk")
                 
                 def lines = results_file.readLines()
-
-                def header = lines[0].split(',')
-                
-                def geneNameIndex = header.findIndexOf { it.replaceAll('"', '').toLowerCase() == "gene_name" }
-                def log2FCIndex = header.findIndexOf { it.replaceAll('"', '').toLowerCase() == "log2foldchange" }
-                
-                if (geneNameIndex == -1 || log2FCIndex == -1) {
-                    error "No se encontraron las columnas necesarias en el archivo de resultados de DESeq2"
-                }
-                
-                def rnkContent = lines[1..-1].collect { line ->
-                    def fields = line.split(',').collect { it.replaceAll('"', '') }
-                    if (fields.size() <= geneNameIndex || fields.size() <= log2FCIndex) {
-                        return null
+                if (lines.size() > 1) {
+                    def header = lines[0].split(',')
+                    
+                    def geneNameIndex = header.findIndexOf { it.replaceAll('"', '').toLowerCase() == "gene_name" }
+                    def log2FCIndex = header.findIndexOf { it.replaceAll('"', '').toLowerCase() == "log2foldchange" }
+                    
+                    if (geneNameIndex == -1 || log2FCIndex == -1) {
+                        error "No se encontraron las columnas necesarias en el archivo de resultados de DESeq2"
                     }
-                    "${fields[geneNameIndex]}\t${fields[log2FCIndex]}"
-                }.findAll { it != null }
-                
-                rnk_file.text = rnkContent.sort { -it.split('\t')[1].toDouble() }.join('\n')
+                    
+                    def rnkContent = lines.subList(1, lines.size()).collect { line ->
+                        def fields = line.split(',').collect { it.replaceAll('"', '') }
+                        if (fields.size() > geneNameIndex && fields.size() > log2FCIndex) {
+                            "${fields[geneNameIndex]}\t${fields[log2FCIndex]}"
+                        } else {
+                            null
+                        }
+                    }.findAll { it != null }
+                    
+                    rnk_file.text = rnkContent.sort { -it.split('\t')[1].toDouble() }.join('\n')
+                } else {
+                    log.warn "El archivo de resultados de DESeq2 está vacío o solo contiene encabezado"
+                    rnk_file.text = ""
+                }
                 
                 [ meta, rnk_file ]
             }
-
-        // Crear un canal para los archivos GMT (ahora con símbolos de genes)
+        
+        // Crear un canal para los archivos GMT
         gmt_files = Channel.fromPath(params.gsea_gmt_symbols)
-
+        
         // Combinar los resultados de DESeq2 con cada archivo GMT
-        gsea_input = deseq2_results_for_gsea.combine(gmt_files)
-
+        gsea_input = deseq2_results_for_gsea
+            .combine(gmt_files)
+            .map { meta, rnk, gmt -> [ meta, rnk, gmt ] }
+        
         // Ejecutar GSEA para cada combinación de resultados y archivo GMT
         GSEA(gsea_input)
 
