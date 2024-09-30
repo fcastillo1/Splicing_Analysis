@@ -215,12 +215,12 @@ Si utilizas este pipeline en tu investigación, por favor cítalo como:
 ## Trimmomatic
 El comando utilizado para realizar el trimming de las secuencias es:
 - Para datos de secuenciación de lectura simple (SE)
-     ```
-trimmomatic SE $reads ${sample_id}_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+  ```
+   trimmomatic SE $reads ${sample_id}_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
   ```
 - Para datos de secuenciación de lectura pareada (PE)
    ```
-trimmomatic PE ${reads[0]} ${reads[1]} ${sample_id}_1_paired_trimmed.fastq.gz ${sample_id}_1_unpaired_trimmed.fastq.gz ${sample_id}_2_paired_trimmed.fastq.gz ${sample_id}_2_unpaired_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+   trimmomatic PE ${reads[0]} ${reads[1]} ${sample_id}_1_paired_trimmed.fastq.gz ${sample_id}_1_unpaired_trimmed.fastq.gz ${sample_id}_2_paired_trimmed.fastq.gz ${sample_id}_2_unpaired_trimmed.fastq.gz ILLUMINACLIP:${params.adapters}:2:30:10      LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
   ```
 - Parámetros:
    - `SE o PE`: Se ajusta el modo de ejecución de trimmomatic si los datos son de lectura simple (Single-End, SE) o lectura pareada (Paired-End, PE). En ese caso el parámetro utilizado fue Paired-End.
@@ -231,3 +231,8 @@ trimmomatic PE ${reads[0]} ${reads[1]} ${sample_id}_1_paired_trimmed.fastq.gz ${
    - `TRAILING`: Elimina las bases de baja calidad desde el extremo 3' si su calidad es inferior a 3.
    - `SLIDINGWINDOW`: Aplica un corte si la calidad promedio de una ventana de 4 bases es menor a 15.
    - `MINLEN`: Este parámetro recorta de secuencias cuya longitud final sea menor a 36 nucleótidos.
+
+
+## STAR
+
+
