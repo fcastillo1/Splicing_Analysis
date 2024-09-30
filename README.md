@@ -268,8 +268,8 @@ El comando utilizado para realizar el trimming de las secuencias es:
    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
   ```
    - Parámetros:
-      -`task.cpus`: Especifica el número de hilos de CPU a utilizar para en el proceso, en este caso se definió en 4 hilos.
-      -`o`: Indica el nombre del archivo de salida que contendrá las lecturas ordenadas. El archivo final tiene el identificador de la muestra, y sorted.bam para indicar que el archivo está ordenado.
+      - `task.cpus`: Especifica el número de hilos de CPU a utilizar para en el proceso, en este caso se definió en 4 hilos.
+      - `o`: Indica el nombre del archivo de salida que contendrá las lecturas ordenadas. El archivo final tiene el identificador de la muestra, y sorted.bam para indicar que el archivo está ordenado.
       bam: Especifica la ruta del archivo BAM a ordenar. 
 
 - Indexar el archivo BAM
@@ -292,7 +292,7 @@ El comando utilizado para realizar el trimming de las secuencias es:
       - `o`: Define el nombre del archivo GTF de salida, que contiene la anotación fusionada de las muestras.
       - `p`: Indica el número de hilos de CPU a utilizar para el proceso de fusión. En este caso se utilizó 4.
 
-Comparación con GffCompare:
+- Comparación con GffCompare:
    ```
    gffcompare -R -V -r $reference_gtf stringtie_merged.gtf
   ```
@@ -302,7 +302,7 @@ Comparación con GffCompare:
       - `r`: Especifica el archivo GTF de referencia.
       - `stringtie_merged.gtf`: El archivo GTF fusionado que se comparará contra el archivo de referencia.
 
-Ejecutar StringTie en archivos BAM:
+- Ejecutar StringTie en archivos BAM:
    ```
    stringtie $bam -G $gtf -o ${sample_id}.gtf $strandedness -a 8 -p $task.cpus
   ```
