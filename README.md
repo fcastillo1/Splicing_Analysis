@@ -267,17 +267,17 @@ El comando utilizado para realizar el trimming de las secuencias es:
    ```
    samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
   ```
-- Parámetros:
-   -`task.cpus`: Especifica el número de hilos de CPU a utilizar para en el proceso, en este caso se definió en 4 hilos.
-   -`o`: Indica el nombre del archivo de salida que contendrá las lecturas ordenadas. El archivo final tiene el identificador de la muestra, y sorted.bam para indicar que el archivo está ordenado.
-   bam: Especifica la ruta del archivo BAM a ordenar. 
+   - Parámetros:
+      -`task.cpus`: Especifica el número de hilos de CPU a utilizar para en el proceso, en este caso se definió en 4 hilos.
+      -`o`: Indica el nombre del archivo de salida que contendrá las lecturas ordenadas. El archivo final tiene el identificador de la muestra, y sorted.bam para indicar que el archivo está ordenado.
+      bam: Especifica la ruta del archivo BAM a ordenar. 
 
 - Indexar el archivo BAM
    ```
    samtools index ${sample_id}.sorted.bam
   ```
-- Parámetros:
-   - `sample_id.sorted.bam: Especifica el archivo BAM en particular que es ordenado e indexado. 
+   - Parámetros:
+      - `sample_id.sorted.bam: Especifica el archivo BAM en particular que es ordenado e indexado. 
 
 
 ## StringTie
@@ -285,22 +285,22 @@ El comando utilizado para realizar el trimming de las secuencias es:
    ```
    stringtie --merge -G $reference_gtf -o stringtie_merged.gtf assembly_gtf_list.txt -p $task.cpus
   ```
-- Parámetros:
-   - `assembly_gtf_list.txt`: Lista de todos los archivos .gtf en el directorio.
-   - `merge`: Indica que StringTie debe realizar una fusión de múltiples archivos GTF en uno solo.
-   - `G`: Especifica el archivo GTF proporciona anotaciones conocidas para guiar el proceso de fusión. 
-   - `o`: Define el nombre del archivo GTF de salida, que contiene la anotación fusionada de las muestras.
-   - `p`: Indica el número de hilos de CPU a utilizar para el proceso de fusión. En este caso se utilizó 4.
+   - Parámetros:
+      - `assembly_gtf_list.txt`: Lista de todos los archivos .gtf en el directorio.
+      - `merge`: Indica que StringTie debe realizar una fusión de múltiples archivos GTF en uno solo.
+      - `G`: Especifica el archivo GTF proporciona anotaciones conocidas para guiar el proceso de fusión. 
+      - `o`: Define el nombre del archivo GTF de salida, que contiene la anotación fusionada de las muestras.
+      - `p`: Indica el número de hilos de CPU a utilizar para el proceso de fusión. En este caso se utilizó 4.
 
 Comparación con GffCompare:
    ```
    gffcompare -R -V -r $reference_gtf stringtie_merged.gtf
   ```
-- Parámetros:
-   - `R`: Utiliza el archivo GTF de referencia para la comparación.
-   - `V`: Produce un informe de las diferencias entre las anotaciones.
-   - `r`: Especifica el archivo GTF de referencia.
-   - `stringtie_merged.gtf`: El archivo GTF fusionado que se comparará contra el archivo de referencia.
+   - Parámetros:
+      - `R`: Utiliza el archivo GTF de referencia para la comparación.
+      - `V`: Produce un informe de las diferencias entre las anotaciones.
+      - `r`: Especifica el archivo GTF de referencia.
+      - `stringtie_merged.gtf`: El archivo GTF fusionado que se comparará contra el archivo de referencia.
 
 Ejecutar StringTie en archivos BAM:
    ```
@@ -309,32 +309,32 @@ Ejecutar StringTie en archivos BAM:
   ```
    stringtie $bam -G $gtf -o ${sample_id}_for_DGE.gtf $strandedness -a 8 -e -p $task.cpus
   ```
-- Parámetros:
-   - `$bam`: Especifica el archivo BAM de entrada con lecturas alineadas.
-   - `G`: Utiliza el archivo GTF de referencia para guiar el ensamblaje.
-   - `o`: Define el nombre del archivo GTF de salida.
-   - `$strandedness`: Especifica la orientación de las lecturas. El valor puede ser fr-first stranded, fr-second strand y fr-unstranded, el cual fue utilizado para este proceso.
-   - `a`: Establece el tamaño del fragmento para el ensamble. En este caso, fue de 8 bases.
-   - `e`: Ejecuta el ensamblaje en modo de expresión.
+   - Parámetros:
+      - `$bam`: Especifica el archivo BAM de entrada con lecturas alineadas.
+      - `G`: Utiliza el archivo GTF de referencia para guiar el ensamblaje.
+      - `o`: Define el nombre del archivo GTF de salida.
+      - `$strandedness`: Especifica la orientación de las lecturas. El valor puede ser fr-first stranded, fr-second strand y fr-unstranded, el cual fue utilizado para este proceso.
+      - `a`: Establece el tamaño del fragmento para el ensamble. En este caso, fue de 8 bases.
+      - `e`: Ejecuta el ensamblaje en modo de expresión.
 
 - Convertir GFF a GTF con GffRead:
    ```
    gffread -E gffcmp.annotated.corrected.gff -T -o gffcmp.annotated.corrected.gtf
   ```
-- Parámetros:
-   - `E`: Excluye las transcripciones extendidas (opcional), en este caso se usó un archivo que mejora las correcciones del archivo de anotación.
-   - `T`: Convierte el archivo a formato GTF.
-   - `o`: Archivo GTF de salida.
+   - Parámetros:
+      - `E`: Excluye las transcripciones extendidas (opcional), en este caso se usó un archivo que mejora las correcciones del archivo de anotación.
+      - `T`: Convierte el archivo a formato GTF.
+      - `o`: Archivo GTF de salida.
 
 - Preparar matrices de conteo con PrepDE:
    ```
    prepDE.py -i sample_lst.txt -l ${params.readlength} -g ${run_prefix}_gene_count_matrix.csv -t ${run_prefix}_transcript_count_matrix.csv
   ```
-- Parámetros:
-   - `i`: Archivo que contiene la lista de archivos GTF generados para cada muestra.
-   - `l`: Longitud de las lecturas utilizadas en el análisis.
-   - `g`: Archivo CSV de salida con la matriz de conteo de genes.
-   - `t`: Archivo CSV de salida con la matriz de conteo de transcritos.
+   - Parámetros:
+      - `i`: Archivo que contiene la lista de archivos GTF generados para cada muestra.
+      - `l`: Longitud de las lecturas utilizadas en el análisis.
+      - `g`: Archivo CSV de salida con la matriz de conteo de genes.
+      - `t`: Archivo CSV de salida con la matriz de conteo de transcritos.
 
 
 ## BigWig
