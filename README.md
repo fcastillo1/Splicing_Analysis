@@ -418,72 +418,72 @@ El comando utilizado para realizar el trimming de las secuencias es:
    ```
    suppa.py generateEvents -i ${gtf_file} -o events -f ioe -e ${params.events}
   ```
-- Parámetros:
-   - `-i`: Archivo GTF de entrada.
-   - `-o`: Prefijo para los archivos de salida.
-   - `-f`: Formato de eventos, en este caso se utilizó IOE (Inclusion of Events), donde contiene información sobre la inclusión o exclusión de un exón en eventos de splicing alternativo.
-   - `-e`: Tipos de eventos a generar, entre las opciones son SE, A5/A3, MX, RI, AF/AL. En este caso se consideraron todos los eventos.
+   - Parámetros:
+      - `-i`: Archivo GTF de entrada.
+      - `-o`: Prefijo para los archivos de salida.
+      - `-f`: Formato de eventos, en este caso se utilizó IOE (Inclusion of Events), donde contiene información sobre la inclusión o exclusión de un exón en eventos de splicing alternativo.
+      - `-e`: Tipos de eventos a generar, entre las opciones son SE, A5/A3, MX, RI, AF/AL. En este caso se consideraron todos los eventos.
 
 - Generación de isoformas.
    ```
    suppa.py generateEvents -i ${gtf_file} -o isoforms -f ioi
   ```
-- Parámetros:
-   - `-i`: Archivo GTF de entrada.
-   - `-o`: Prefijo para los archivos de salida.
-   - `-f`: Formato de eventos, la opción IOI (Inclusion of Isoforms) indica la proporción de isoformas en los eventos de splicing y permite medir cómo influyen en las variantes de transcritos.
+   - Parámetros:
+      - `-i`: Archivo GTF de entrada.
+      - `-o`: Prefijo para los archivos de salida.
+      - `-f`: Formato de eventos, la opción IOI (Inclusion of Isoforms) indica la proporción de isoformas en los eventos de splicing y permite medir cómo influyen en las variantes de transcritos.
 
 - Cálculo de PSI por evento.
    ```
    suppa.py psiPerEvent -i $ioe_file -e $tpm -o ${ioe_file.baseName}
   ```
-- Parámetros:
-   - `-i`: Archivo IOE con eventos.
-   - `-e`: Archivo TPM con valores obtenidos desde tximport.
-   - `-o`: Prefijo para los archivos de salida.
+   - Parámetros:
+      - `-i`: Archivo IOE con eventos.
+      - `-e`: Archivo TPM con valores obtenidos desde tximport.
+      - `-o`: Prefijo para los archivos de salida.
 
 - Cálculo de PSI por isoforma.
   ```
    suppa.py psiPerIsoform -g $gtf -e $tpm -o per_isoform
   ```
-- Parámetros:
-   - `-g`: Archivo GTF de referencia.
-   - `-e`: Archivo TPM con valores obtenidos desde tximport.
-   - `-o`: Prefijo para los archivos de salida.
+   - Parámetros:
+      - `-g`: Archivo GTF de referencia.
+      - `-e`: Archivo TPM con valores obtenidos desde tximport.
+      - `-o`: Prefijo para los archivos de salida.
 
 
 - Análisis de splicing diferencial.
   ```
   suppa.py diffSplice -m empirical -i ${ioe_file} -p ${psi_basalA} ${psi_basalB} -e ${tpm_basalA} ${tpm_basalB} --area ${params.area} --lower-bound ${params.lower_bound} --alpha ${params.alpha} --tpm-threshold ${params.tpm_threshold} --nan-   threshold ${params.nan_threshold} -gc -o diffsplice_${event_type}
   ```
-- Parámetros:
-   - `-m`: Método para el cálculo diferencial, puede ser empirical/classical. En este caso se utilizó empirical.
-   - `-i`: Archivo IOE con evento.
-   - `-p`: Archivos con valores PSI para las diferentes condiciones.
-   - `-e`: Archivos con valores TPM por cada una de las condiciones.
-   - `--area`: Área alrededor del evento, el valor utilizado corresponde a 1000.
-   - `--lower-bound`: Umbral inferior de significancia, el valor de este parámetro fue de 0.05.
-   - `--alpha`: Nivel de significancia, el valor utilizado es 0.05
-   - `--tpm-threshold`: Umbral de TPM, el valor definido es 0.
-   - `--nan-threshold`: Umbral para valores NaN, el valor utilizado es 0.
-   - `-gc`: Corrección de sesgo GC.
-   - `-o`: Prefijo para los archivos de salida.
+   - Parámetros:
+      - `-m`: Método para el cálculo diferencial, puede ser empirical/classical. En este caso se utilizó empirical.
+      - `-i`: Archivo IOE con evento.
+      - `-p`: Archivos con valores PSI para las diferentes condiciones.
+      - `-e`: Archivos con valores TPM por cada una de las condiciones.
+      - `--area`: Área alrededor del evento, el valor utilizado corresponde a 1000.
+      - `--lower-bound`: Umbral inferior de significancia, el valor de este parámetro fue de 0.05.
+      - `--alpha`: Nivel de significancia, el valor utilizado es 0.05
+      - `--tpm-threshold`: Umbral de TPM, el valor definido es 0.
+      - `--nan-threshold`: Umbral para valores NaN, el valor utilizado es 0.
+      - `-gc`: Corrección de sesgo GC.
+      - `-o`: Prefijo para los archivos de salida.
 
 - Clustering de eventos de splicing.
   ```
   suppa.py clusterEvents --dpsi diffsplice_${event_type}.dpsi --psivec diffsplice_${event_type}.psivec --sig-threshold ${params.sig_threshold} --dpsi-threshold ${params.dpsi_threshold} --eps ${params.eps} --metric ${params.metric} --min-pts    ${params.min_pts} --groups ${params.groups} --clustering ${params.clustering_method} -o cluster${event_type}
   ```
-- Parámetros:
-   - `--dpsi`: Archivo ΔPSI para clustering.
-   - `--psivec`: Archivo vector PSI para clustering.
-   - `--sig-threshold`: Umbral de significancia, el valor definido fue de 0.05.
-   - `--dpsi-threshold`: Umbral de ΔPSI, en este caso el valor utilizado fue 0.05.
-   - `--eps`: Parámetro épsilon para DBSCAN, el valor fue 0.05.
-   - `--metric`: Métrica de las distancias utilizadas para el cálculo, las opciones son euclidean, manhattan, cosine. En este caso la métrica utilizada fue euclidean.
-   - `--min-pts`: Número mínimo de puntos para clúster, en este caso el valor utilizado es 20.
-   - `--groups`: Para el clustering de eventos, especifica los rangos de columnas para cada condición. Por ejemplo,  si la primera condición tiene tres muestras y la segunda condición también, el parámetro sería 1-3,4-6.
-   - `--clustering`: Método de clustering, existen dos opciones las cuales son DBSCAN, OPTICS. En este caso el valor utilizado fue DBSCAN.
-   - `-o`: Prefijo para los archivos de salida.
+   - Parámetros:
+      - `--dpsi`: Archivo ΔPSI para clustering.
+      - `--psivec`: Archivo vector PSI para clustering.
+      - `--sig-threshold`: Umbral de significancia, el valor definido fue de 0.05.
+      - `--dpsi-threshold`: Umbral de ΔPSI, en este caso el valor utilizado fue 0.05.
+      - `--eps`: Parámetro épsilon para DBSCAN, el valor fue 0.05.
+      - `--metric`: Métrica de las distancias utilizadas para el cálculo, las opciones son euclidean, manhattan, cosine. En este caso la métrica utilizada fue euclidean.
+      - `--min-pts`: Número mínimo de puntos para clúster, en este caso el valor utilizado es 20.
+      - `--groups`: Para el clustering de eventos, especifica los rangos de columnas para cada condición. Por ejemplo,  si la primera condición tiene tres muestras y la segunda condición también, el parámetro sería 1-3,4-6.
+      - `--clustering`: Método de clustering, existen dos opciones las cuales son DBSCAN, OPTICS. En este caso el valor utilizado fue DBSCAN.
+      - `-o`: Prefijo para los archivos de salida.
 
 
 ## DESeq2
