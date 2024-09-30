@@ -135,11 +135,11 @@ Algunos parametros pueden ser modificados en nextflow.config
 - `--single_end`: Usar si las lecturas son single-end (por defecto: false)
 - `--stranded`: Especifica la orientación de la hebra ('first-strand', 'second-strand', o 'unstranded')
 - Los modos de alineamientos corresponden a:
-     - aligner_star: Realiza todo el proceso del pipeline del brazo de STAR. Sus opciones son True/False.
-     - aligner_salmon: Realiza todo el proceso del pipeline del brazo de Salmon. Sus opciones son True/False.
-     - full_pipeline: Realiza todo el pipeline. Sus opciones son True/False.
-- readlength: Largo de los reads.
-- adapters: Ruta a los adaptadores.
+     - `aligner_star`: Realiza todo el proceso del pipeline del brazo de STAR. Sus opciones son True/False.
+     - `aligner_salmon`: Realiza todo el proceso del pipeline del brazo de Salmon. Sus opciones son True/False.
+     - `full_pipeline`: Realiza todo el pipeline. Sus opciones son True/False.
+- `readlength`: Largo de los reads.
+- `adapters`: Ruta a los adaptadores.
 
 Para ver todos los parámetros disponibles se puede acceder a nextflow.config
 
@@ -179,18 +179,18 @@ URL del Proyecto: [https://github.com/fcastillo1/differential-splicing-pipeline]
 
 - [FastQC] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 - [Trimmomatic] (http://www.usadellab.org/cms/?page=trimmomatic)
-- [STAR](https://github.com/alexdobin/STAR)
-- [Salmon](https://combine-lab.github.io/salmon/)
-- [Samtools](http://www.htslib.org/)
-- [StringTie](https://ccb.jhu.edu/software/stringtie/)
-- [rMATS](http://rnaseq-mats.sourceforge.net/)
+- [STAR] (https://github.com/alexdobin/STAR)
+- [Salmon] (https://combine-lab.github.io/salmon/)
+- [Samtools] (http://www.htslib.org/)
+- [StringTie] (https://ccb.jhu.edu/software/stringtie/)
+- [rMATS] (http://rnaseq-mats.sourceforge.net/)
 - [Sashimi plots] (https://github.com/guigolab/rmats2sashimiplot)
 - [Tximport] (https://bioconductor.org/packages/release/bioc/html/tximport.html)
-- [SUPPA2](https://github.com/comprna/SUPPA)
+- [SUPPA2] (https://github.com/comprna/SUPPA)
 - [DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 - [GSEA] (https://www.gsea-msigdb.org/gsea/index.jsp)
 - [g:Profiler] (https://biit.cs.ut.ee/gprofiler/gost)
 - [MultiQC] https://multiqc.info/)
-- [Nextflow](https://www.nextflow.io/)
-- [nf-core](https://nf-co.re/)
+- [Nextflow] (https://www.nextflow.io/)
+- [nf-core] (https://nf-co.re/)
   
