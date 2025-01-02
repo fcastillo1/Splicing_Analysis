@@ -15,7 +15,7 @@ RUN mkdir -p /usr/local/lib/R/site-library && \
     chown -R root:staff /usr/local/lib/R && \
     chmod -R g+w /usr/local/lib/R && \
     chmod -R 777 /usr/local/lib/R/site-library
-
+    
 # Actualiza e instala dependencias
 RUN apt-get update && apt-get install -y \
     software-properties-common \
@@ -86,7 +86,7 @@ RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc |
     apt-get update && apt-get install -y r-base r-base-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     chmod -R 777 /usr/local/lib/R/site-library
-
+    
 # Permisos de R
 RUN chmod -R 777 /usr/local/lib/R/site-library && \
     chown -R root:staff /usr/local/lib/R && \
@@ -124,38 +124,38 @@ RUN wget https://github.com/alexdobin/STAR/archive/2.7.10b.tar.gz && \
     cd / && \
     rm -rf STAR-2.7.10b 2.7.10b.tar.gz
 
-# Instalación Salmon
+# Instalación SALMON
 RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.9.0/salmon-1.9.0_linux_x86_64.tar.gz && \
     tar xf salmon-1.9.0_linux_x86_64.tar.gz && \
     mv salmon-1.9.0_linux_x86_64/bin/* /usr/local/bin/ && \
     mv salmon-1.9.0_linux_x86_64/lib/* /usr/local/lib/ && \
     rm -rf salmon-1.9.0_linux_x86_64*
 
-# Install Trimmomatic
+# Instalación TRIMMOMATIC
 RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip && \
     unzip Trimmomatic-0.39.zip && \
     mv Trimmomatic-0.39 /opt/ && \
     rm Trimmomatic-0.39.zip
 
-# Instalación StringTie
+# Instalación STRINGTIE
 RUN wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-2.2.1.Linux_x86_64.tar.gz && \
     tar xf stringtie-2.2.1.Linux_x86_64.tar.gz && \
     mv stringtie-2.2.1.Linux_x86_64/stringtie /usr/local/bin/ && \
     rm -rf stringtie-2.2.1.Linux_x86_64*
 
-# Instalación gffcompare
+# Instalación GFFCOMPARE
 RUN wget https://github.com/gpertea/gffcompare/releases/download/v0.12.6/gffcompare-0.12.6.Linux_x86_64.tar.gz && \
     tar xf gffcompare-0.12.6.Linux_x86_64.tar.gz && \
     mv gffcompare-0.12.6.Linux_x86_64/gffcompare /usr/local/bin/ && \
     rm -rf gffcompare-0.12.6.Linux_x86_64*
 
-# Instalación gffread
+# Instalación GFFREAD
 RUN wget https://github.com/gpertea/gffread/releases/download/v0.12.7/gffread-0.12.7.Linux_x86_64.tar.gz && \
     tar xf gffread-0.12.7.Linux_x86_64.tar.gz && \
     mv gffread-0.12.7.Linux_x86_64/gffread /usr/local/bin/ && \
     rm -rf gffread-0.12.7.Linux_x86_64*
 
-# Instalación Miniconda 
+# Instalación MINICONDA
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.11.0-2-Linux-x86_64.sh -O miniconda.sh && \
     bash miniconda.sh -b -p /opt/conda && \
     rm miniconda.sh
@@ -168,8 +168,8 @@ RUN conda config --add channels defaults && \
     conda create -n rnaseq_env python=3.9 && \
     echo "source activate rnaseq_env" > ~/.bashrc
 
-# Instalación de los paquetes de conda en el ambiente
-RUN conda Instalación -n rnaseq_env -y -c bioconda -c conda-forge \
+# Instalación paquetes de conda
+RUN conda install -n rnaseq_env -y -c bioconda -c conda-forge \
     multiqc=1.14 \
     fastqc=0.11.9 \
     suppa=2.3 \
@@ -184,37 +184,35 @@ RUN conda Instalación -n rnaseq_env -y -c bioconda -c conda-forge \
     statsmodels \
     && conda clean -a
 
-# Instalación rMATS v4.3.0
+# Instalación RMATS
 RUN git clone https://github.com/Xinglab/rmats-turbo.git /opt/rmats && \
     cd /opt/rmats && \
     git checkout v4.3.0 && \
-    /opt/conda/envs/rnaseq_env/bin/pip Instalación numpy cython && \
+    /opt/conda/envs/rnaseq_env/bin/pip install numpy cython && \
     ./build_rmats && \
     chmod +x /opt/rmats/rmats.py && \
     ln -s /opt/rmats/rmats.py /usr/local/bin/rmats.py
 
 # Instalación de los paquetes de python en conda
-RUN /opt/conda/envs/rnaseq_env/bin/pip Instalación \
+RUN /opt/conda/envs/rnaseq_env/bin/pip install \
     pyarrow \
     openpyxl
 
-# Configuracion del ambiente
+# Configuracion del ambiente y tximport
 ENV PATH=$PATH:/opt/GSEA_4.3.3:/opt/FastQC:/opt/rmats/rMATS-turbo-Linux-UCS4
 ENV TRIMMOMATIC_HOME=/opt/Trimmomatic-0.39
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
-# Configuracion de Tximport
 COPY tximport.R /usr/local/bin/
 RUN chmod +x /usr/local/bin/tximport.R
 
-# Verfica que conda este en el path
 ENV PATH="/opt/conda/envs/rnaseq_env/bin:$PATH"
 RUN echo "source /opt/conda/etc/profile.d/conda.sh && conda activate rnaseq_env" >> ~/.bashrc
 
 # Crea el link de multiqc
 RUN ln -s /opt/conda/envs/rnaseq_env/bin/multiqc /usr/local/bin/multiqc
 
-# Indica el directorio de trabajo
+# Directorio de trabajo
 WORKDIR /data
 
 # Verifica las instalaciones
@@ -236,3 +234,4 @@ RUN R -e 'library(DESeq2); packageVersion("DESeq2")' && \
     [ -f /usr/local/bin/tximport.R ] && echo "tximport.R installed successfully"
 
 CMD ["/bin/bash"]
+
