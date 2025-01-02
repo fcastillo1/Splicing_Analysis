@@ -12,6 +12,7 @@ process SAMTOOLS_SORT_INDEX {
 
     script:
     """
+    # Orden e index de los archivos BAM
     samtools sort -@ ${task.cpus} -o ${sample_id}.sorted.bam $bam
     samtools index ${sample_id}.sorted.bam
 
