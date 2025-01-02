@@ -10,6 +10,7 @@ process GENERATE_BACKGROUND {
 
     script:
     """
+    # Genera los datos de background para deseq2
     awk -F ',' '{gsub(/"/, "", \$7); print \$7}' ${deseq2_results} > ${meta.id}_background.txt
     """
 }
