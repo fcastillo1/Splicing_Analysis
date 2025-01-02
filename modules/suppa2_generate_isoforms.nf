@@ -1,5 +1,4 @@
 process suppa2_generate_isoforms {
-    //cache false
     publishDir "${params.outdir}/suppa/generate_isoforms", mode: 'copy'
     
     input:
@@ -10,6 +9,9 @@ process suppa2_generate_isoforms {
     
     script:
     """
+    #!/bin/bash
+    export PATH=/opt/conda/bin:\$PATH
+    # Ejeccion de suppa para obtener los eventos IOI
     suppa.py generateEvents -i ${gtf_file} -o isoforms -f ioi
     """
 }
