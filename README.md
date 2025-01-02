@@ -40,50 +40,59 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
    ```
 
 3. Si usas Docker, asegúrate de tener Docker instalado y en ejecución.
-   VERIFICAR LA INSTALACIÓN DE DOCKER
-docker --version 
+   - Verificar la instalación de Docker
+   ```
+   docker --version
+   ```
+   - Ver dockers activos
+   ```
+   docker ps
+   ```
 
-Ver dockers activos 
-docker ps
+   - Ver todos los dockers (incluyendo detenidos) 
+   ```
+   docker ps -a 
+   ```
+   
+   - Verificar espacio disponible
+   ```
+   df -h
+   ```
+   
+   - Los montajes en Docker conectan directorios de tu computadora (host) con directorios dentro del contenedor, es decir para poder utilizar los archivos correctamente y que estén disponibles con los programas de docker se tienen que montar para esto se utiliza la opción -v, como se observa a continuación
+   ```
+   -v /ruta/en/tu/computadora:/ruta/en/el/contenedor
+   ```
 
-Ver todos los dockers (incluyendo detenidos) 
-docker ps -a 
-
-Verificar espacio disponible
-df -h
-
-Los montajes en Docker conectan directorios de tu computadora (host) con directorios dentro del contenedor, es decir para poder utilizar los archivos correctamente y que estén disponibles con los programas de docker se tienen que montar para esto se utiliza la opción -v, como se observa a continuación
-
--v /ruta/en/tu/computadora:/ruta/en/el/contenedor
-En el directorio del proyecto donde esta el main y el docker hay que construir la imagen para usar los programas
-docker build -t rnaseq_pipeline:latest .
-
-Después de ejecuta el pipeline 
-
-sudo docker run \
-  # Montajes de datos de entrada
-  -v /home/francisca/Data_Intento_Giulia:/Data_Giulia \
-  -v /mnt/disco_2/FReyes/Giulia_Data:/Giulia_Data \
-  
-  # Montajes de datos de referencia
-  -v /mnt/disco_2/FReyes/Datos:/FReyes/Datos \
-  
-  # Montaje para resultados
-  -v /mnt/disco_2/FReyes/results_control_treatment_star:/FReyes/results_control_treatment_star \
-  
-  # Montajes del pipeline
-  -v /home/francisca/Proyecto/DifferentialSplicingAnalysis:/pipeline \
-  -v $(pwd)/work:/pipeline/work \
-  
-  # Directorio de trabajo
-  -w /pipeline \
-  
-  # Imagen y comando
-  rnaseq_pipeline:latest \
-  nextflow run main.nf \
-  [resto de los parámetros...]
-
-
+   - En el directorio del proyecto donde esta el main y el docker hay que construir la imagen para usar los programas
+   ```
+   docker build -t rnaseq_pipeline:latest .
+   ```
+   - Después de ejecuta el pipeline 
+   ```
+   sudo docker run \
+     # Montajes de datos de entrada
+     -v /home/francisca/Data_Intento_Giulia:/Data_Giulia \
+     -v /mnt/disco_2/FReyes/Giulia_Data:/Giulia_Data \
+     
+     # Montajes de datos de referencia
+     -v /mnt/disco_2/FReyes/Datos:/FReyes/Datos \
+     
+     # Montaje para resultados
+     -v /mnt/disco_2/FReyes/results_control_treatment_star:/FReyes/results_control_treatment_star \
+     
+     # Montajes del pipeline
+     -v /home/francisca/Proyecto/DifferentialSplicingAnalysis:/pipeline \
+     -v $(pwd)/work:/pipeline/work \
+     
+     # Directorio de trabajo
+     -w /pipeline \
+     
+     # Imagen y comando
+     rnaseq_pipeline:latest \
+     nextflow run main.nf \
+     [resto de los parámetros...]
+   ```
 
 ## Configuración
 
