@@ -13,6 +13,9 @@ process suppa_diffsplice_ioe {
 
     script:
     """
+    #!/bin/bash
+    export PATH=/opt/conda/bin:\$PATH
+
     set -e
 
     echo "Verificando archivos de entrada:" > ${event_type}_diffsplice.log
