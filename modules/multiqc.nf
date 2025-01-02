@@ -11,11 +11,10 @@ process multiqc_run {
 
     script:
     """
-    multiqc . -f
-
+    multiqc .
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+        multiqc: \$(multiqc --version | sed -e "s/multiqc, version //g")
     END_VERSIONS
     """
 }
