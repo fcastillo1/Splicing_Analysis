@@ -1,3 +1,4 @@
+// incio del proceso de descarga
 process download_srr {
     publishDir "${params.outdir}/downloaded", mode: 'copy'
 
@@ -7,8 +8,10 @@ process download_srr {
     output:
     tuple val(srr_id), path("${srr_id}_1.fastq.gz"), val(condition)
 
+// Script de funcionamiento
     script:
     """
+    # Descarga y Procesamiento
     prefetch ${srr_id}
     fastq-dump --gzip --split-3 ${srr_id}
     
