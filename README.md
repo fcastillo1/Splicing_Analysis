@@ -31,8 +31,7 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
 
 1. Clona este repositorio:
    ```
-   git clone https://github.com/fcastillo1/Splicing_Analysis.git
-   cd Splicing_Analysis
+
    ```
 
 2. Instala Nextflow:
@@ -40,7 +39,50 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
    curl -s https://get.nextflow.io | bash
    ```
 
-3. Si usas Docker, asegúrate de tener Docker instalado y en ejecución. (AGREGAR PASOS)
+3. Si usas Docker, asegúrate de tener Docker instalado y en ejecución.
+   VERIFICAR LA INSTALACIÓN DE DOCKER
+docker --version 
+
+Ver dockers activos 
+docker ps
+
+Ver todos los dockers (incluyendo detenidos) 
+docker ps -a 
+
+Verificar espacio disponible
+df -h
+
+Los montajes en Docker conectan directorios de tu computadora (host) con directorios dentro del contenedor, es decir para poder utilizar los archivos correctamente y que estén disponibles con los programas de docker se tienen que montar para esto se utiliza la opción -v, como se observa a continuación
+
+-v /ruta/en/tu/computadora:/ruta/en/el/contenedor
+En el directorio del proyecto donde esta el main y el docker hay que construir la imagen para usar los programas
+docker build -t rnaseq_pipeline:latest .
+
+Después de ejecuta el pipeline 
+
+sudo docker run \
+  # Montajes de datos de entrada
+  -v /home/francisca/Data_Intento_Giulia:/Data_Giulia \
+  -v /mnt/disco_2/FReyes/Giulia_Data:/Giulia_Data \
+  
+  # Montajes de datos de referencia
+  -v /mnt/disco_2/FReyes/Datos:/FReyes/Datos \
+  
+  # Montaje para resultados
+  -v /mnt/disco_2/FReyes/results_control_treatment_star:/FReyes/results_control_treatment_star \
+  
+  # Montajes del pipeline
+  -v /home/francisca/Proyecto/DifferentialSplicingAnalysis:/pipeline \
+  -v $(pwd)/work:/pipeline/work \
+  
+  # Directorio de trabajo
+  -w /pipeline \
+  
+  # Imagen y comando
+  rnaseq_pipeline:latest \
+  nextflow run main.nf \
+  [resto de los parámetros...]
+
 
 
 ## Configuración
@@ -48,9 +90,9 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
 1. Archivo de configuración principal: `nextflow.config`
    - Aquí se definen los parámetros globales y las configuraciones de los procesos.
 
-2. Archivos de configuración de Docker (PENDIENTE)
+2. Archivos de configuración de Docker (Dockerfile)
 
-3. Módulos: Directorio `modules/`
+4. Módulos: Directorio `modules/`
    - Contiene los scripts de los procesos individuales (STAR, Salmon, rMATS, etc.)
 
 ## Uso
@@ -58,24 +100,44 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
 ### Preparación de Datos
 
 1. Prepara tu archivo de muestras (`samplesheet.csv`) con el siguiente formato:
-   - En caso de que las muestras sean Single End
-     ```
-     sample_id,fastq,fastq2,condition
-     muestra1,/ruta/a/muestra1_R1.fastq.gz,,control
-     muestra2,/ruta/a/muestra2_R1.fastq.gz,,tratamiento
-     ```
-    - En caso de que las muestras sean Paired End
-       ```
-       sample_id,fastq,fastq2,condition
-       muestra1,/ruta/a/muestra1_R1.fastq.gz,/ruta/a/muestra1_R2.fastq.gz,control
-       muestra2,/ruta/a/muestra2_R1.fastq.gz,/ruta/a/muestra2_R2.fastq.gz,tratamiento
-       ```
-    - En caso de que las muestras necesiten ser descargadas
-       ```
-       sample_id,fastq,fastq2,condition
-       SRR muestra1,,,control
-       SRR muestra2,,,tratamiento
-       ```
+- Para descargas (SRR):
+   ```
+   # Paired-end SRR
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   SRR12463396,,,control,,,
+   SRR12463397,,,treatment,,,
+
+   # Single-end SRR
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   SRR12463396,,,control,,
+   SRR12463397,,,treatment,,
+   ```
+
+- Para archivos crudos locales:
+  ```
+   # Paired-end crudos
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   sample1,/path/to/sample1_R1.fastq.gz,/path/to/sample1_R2.fastq.gz,control,,,
+   sample2,/path/to/sample2_R1.fastq.gz,/path/to/sample2_R2.fastq.gz,treatment,,,
+   
+   # Single-end crudos
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   sample1,/path/to/sample1.fastq.gz,,control,,
+   sample2,/path/to/sample2.fastq.gz,,treatment,,
+   ```
+
+- Para archivos ya trimados:
+  ```
+   # Paired-end trimados
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   sample1,,,control,/path/to/sample1_1_trimmed.fastq.gz,/path/to/sample1_2_trimmed.fastq.gz
+   sample2,,,treatment,/path/to/sample2_1_trimmed.fastq.gz,/path/to/sample2_2_trimmed.fastq.gz
+   
+   # Single-end trimados
+   sample_id,fastq,fastq2,condition,trimmed_fastq,trimmed_fastq2
+   sample1,,,control,/path/to/sample1_trimmed.fastq.gz,
+   sample2,,,treatment,/path/to/sample2_trimmed.fastq.gz,
+   ```
 
 2. Asegúrate de tener los siguientes archivos de referencia:
    - Genoma de referencia (formato FASTA) puede ser comprimido.
@@ -96,12 +158,7 @@ Este pipeline de Nextflow está diseñado para realizar un análisis completo de
        condicion2: 4-6
        ```
       Este archivo se genera con el número de las muestras (archivos BAM) separados por un guión. Este orden debe seguir a los archivos BAM.
-     
-   - Archivo constasts.csv para realizar las comparaciones con DESeq2. Por ejemplo:
-       ```
-      id,variable,reference,target,blocking
-      basalB_vs_basalA,condition,basalA,basalB,
-       ```
+    
    - Generación de archivos BAM por cada condición para realizar el proceso de rMATS
        ```
       condicion 1: path/archivo1.bam,path/archivo2.bam,path/archivo3.bam
@@ -143,18 +200,18 @@ Algunos parametros pueden ser modificados en nextflow.config
 
 Para ver todos los parámetros disponibles se puede acceder a nextflow.config
 
-
-
-## Procesos Detallados (PENDIENTE)
+## Procesos Detallados
 
 1. **FastQC**: Control de calidad de lecturas crudas y recortadas.
 2. **Trimmomatic**: Recorte de adaptadores y filtrado de calidad.
 3. **STAR**: Alineamiento de lecturas al genoma de referencia.
 4. **Salmon**: Cuantificación de la expresión de transcritos.
-5. **StringTie**: Ensamblaje de transcritos y estimación de abundancia.
 6. **rMATS**: Detección y cuantificación de eventos de splicing diferencial.
 7. **SUPPA2**: Análisis adicional de splicing diferencial.
-8. **MultiQC**: Generación de informe de control de calidad integrado.
+8. **DESeq2**: Análisis adicional de expresión diferencial.
+9. **GProfiler2**: Enriquecimiento funcional de genes y rutas biológicas.
+10. **GSEA**: Enriquecimiento de genes
+11. **MultiQC**: Generación de informe de control de calidad integrado.
 
 ## Solución de Problemas
 - **Pipeline se detiene inesperadamente**: Verifica los logs en el directorio `work/` para más detalles.
@@ -165,7 +222,7 @@ Para ver todos los parámetros disponibles se puede acceder a nextflow.config
 Si utilizas este pipeline en tu investigación, por favor cítalo como:
 
 ```
-[Reyes, Francisca]. (2024). Pipeline de Análisis de Splicing Diferencial. GitHub. https://github.com/fcastillo1/Splicing_Analysis
+[Reyes, Francisca]. (2024). Pipeline de Análisis de Splicing Diferencial. GitHub. LINK
 ```
 
 ## Contacto
