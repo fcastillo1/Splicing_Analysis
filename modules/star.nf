@@ -21,28 +21,34 @@ process star {
     def prefix = task.ext.prefix ?: "${sample_id}"
     def read1 = reads[0]
     def read2 = reads.size() > 1 ? reads[1] : ''
+
     """
+    # Ejecucion del alineamiento
     STAR --genomeDir $genomeDir \\
         --readFilesIn $read1 $read2 \\
-        --readFilesCommand zcat \\
-        --readMatesLengthsIn NotEqual \\
+        --readFilesCommand ${params.star_readFilesCommand} \\
+        --readMatesLengthsIn ${params.star_readMatesLengthsIn} \\
         --outFileNamePrefix ${prefix}_ \\
         --runThreadN ${task.cpus} \\
         --sjdbGTFfile $gtf \\
-        --sjdbOverhang ${params.overhang} \\
-        --alignSJDBoverhangMin ${params.sjdbOverhangMin} \\
-        --outFilterScoreMinOverLread ${params.filterScore} \\
-        --outFilterMatchNminOverLread ${params.filterScore} \\
-        --outFilterMismatchNmax ${params.outFilterMismatchNmax} \\
-        --outFilterMultimapNmax 20 \\
-        --alignMatesGapMax 1000000 \\
-        --outSAMattributes All \\
-        --outSAMtype BAM Unsorted \\
-        --outFilterType BySJout \\
-        --twopassMode Basic \\
-        --alignEndsType Local \\
-        --alignIntronMax ${params.alignIntronMax} \\
-        --quantMode GeneCounts
+        --sjdbOverhang ${params.star_overhang} \\
+        --alignSJoverhangMin ${params.star_alignSJoverhangMin} \\
+        --alignSJDBoverhangMin ${params.star_alignSJDBoverhangMin} \\
+        --outFilterScoreMinOverLread ${params.star_filterScore} \\
+        --outFilterMatchNminOverLread ${params.star_filterScore} \\
+        --outFilterMismatchNmax ${params.star_outFilterMismatchNmax} \\
+        --outFilterMultimapNmax ${params.star_outFilterMultimapNmax} \\
+        --alignMatesGapMax ${params.star_alignMatesGapMax} \\
+        --alignIntronMin ${params.star_alignIntronMin} \\
+        --alignIntronMax ${params.star_alignIntronMax} \\
+        --outSAMattributes ${params.star_outSAMattributes} \\
+        --outSAMtype ${params.star_outSAMtype} \\
+        --outFilterType ${params.star_outFilterType} \\
+        --twopassMode ${params.star_twopassMode} \\
+        --alignEndsType ${params.star_alignEndsType} \\
+        --quantMode ${params.star_quantMode} \\
+        ${params.star_soft_clipping ? '' : '--alignEndsType EndToEnd'} \\
+        ${params.star_save_unmapped ? '--outReadsUnmapped Fastx' : ''}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
