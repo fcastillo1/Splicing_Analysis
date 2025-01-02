@@ -2,7 +2,7 @@
 
 library(optparse)
 
-# Define command line options
+# Define las opciones que se necesitan para hacer el sashimiplot
 option_list = list(
   make_option(c("-d", "--rMATSdir"), type="character", default=NULL, help="Directory of rMATS results", metavar="character"),
   make_option(c("-e", "--eventTypes"), type="character", default="SE,A3SS,A5SS,MXE,RI", help="Event types separated by commas", metavar="character"),
@@ -16,7 +16,7 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 
-# Function to filter events by type
+# Filtra por el tipo de evento
 filter_events_by_type <- function(file, event_type) {
   if (file.exists(file)) {
     events <- read.table(file, header=TRUE, sep="\t", stringsAsFactors=FALSE)
@@ -28,23 +28,23 @@ filter_events_by_type <- function(file, event_type) {
   }
 }
 
-# Read BAM files
+# Se leen los archivos bam
 bam1_files <- readLines(opt$bam1)
 bam2_files <- readLines(opt$bam2)
 
-# Ensure output directory exists
+# Se genera el output
 if (!dir.exists(opt$outdir)) {
   dir.create(opt$outdir, recursive = TRUE)
 }
 
-# Process each event type
+# Se procesa el evento
 event_types <- strsplit(opt$eventTypes, ",")[[1]]
 
-# Get all .txt files in the rMATS directory
+# Se genera los archivos en el directorio
 rmats_files <- list.files(path = opt$rMATSdir, pattern = "\\.txt$", full.names = TRUE)
 
 for (event_type in event_types) {
-  # Search for files that match the event type pattern
+  # Se busca el evento
   event_files <- grep(paste0(event_type, ".MATS.(JC|JCEC).txt$"), rmats_files, value = TRUE)
 
   for (event_file in event_files) {
@@ -53,13 +53,13 @@ for (event_type in event_types) {
 
       cat("Filtered events for", event_type, ":", nrow(filtered_events), "\n")
 
-      # Generate sashimiplots for each filtered event
+      # Se genera el sashimi con el evemto filtrado
       for (i in 1:nrow(filtered_events)) {
         event <- filtered_events[i,]
         out_dir <- file.path(opt$outdir, event_type, event$geneSymbol)
         dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-        # Build the rmats2sashimiplot command
+        # Se realiza el comando del sashimi
         cmd <- paste("rmats2sashimiplot",
                      "--b1", shQuote(paste(bam1_files, collapse=",")),
                      "--b2", shQuote(paste(bam2_files, collapse=",")),
@@ -71,7 +71,7 @@ for (event_type in event_types) {
                      "--intron_s", "5",
                      "-o", shQuote(out_dir))
 
-        # Execute the command
+        # Se informa de la ejecucion
         cat("Executing command for", event$geneSymbol, ":", cmd, "\n")
         system(cmd)
 
