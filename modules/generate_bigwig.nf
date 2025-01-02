@@ -10,6 +10,7 @@ process generate_bigwig {
   
   script:
   """
+  # Proceso que genera archivos bigwig
   bamCoverage -b $bam -o ${sample_id}.bw
   """
 }
